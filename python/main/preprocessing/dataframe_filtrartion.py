@@ -1,10 +1,17 @@
 
 import pandas
 import numpy
+from typing import Union, List
+from datetime import datetime
 from python.main.models.fuel_prices_columns import fuel_prices_cols
+
+# TODO create documentation, check doc string for functions, methods and classes
 
 
 class DataFrameFiltration:
+    """
+
+    """
 
     def __init__(self, fuel_data: pandas.DataFrame, date_format="%d/%m/%Y", samples_date_diff=7, number_of_samples=10):
         if isinstance(fuel_data, pandas.DataFrame):
@@ -18,18 +25,31 @@ class DataFrameFiltration:
         self.__number_of_samples = number_of_samples
 
     def remove_not_required_columns(self) -> None:
-        self.__fuel_data.drop(labels=[fuel_prices_cols.not_required_1,
-                                      fuel_prices_cols.not_required_2,
-                                      fuel_prices_cols.not_required_3],
-                              axis=self.__columns,
-                              inplace=True)
-        # TODO add handling KeyError if columns not found, remember to drop all possible columns
+        """
+
+        :return:
+        """
+        columns_to_remove = [fuel_prices_cols.not_required_1,
+                             fuel_prices_cols.not_required_2,
+                             fuel_prices_cols.not_required_3]
+        for column in columns_to_remove:
+            try:
+                self.__fuel_data.drop(columns=column, axis=self.__columns, inplace=True)
+            except KeyError:
+                continue
 
     def get_fuel_data(self) -> pandas.DataFrame:
+        """
+
+        :return:
+        """
         return self.__fuel_data
 
-
     def replace_nan_values(self) -> None:
+        """
+
+        :return:
+        """
         self.__replace_dates()
         self.__replace_fuel_price()
         self.__replace_duty_rates()
@@ -41,9 +61,11 @@ class DataFrameFiltration:
             previous_date = self.__fuel_data[fuel_prices_cols.date_col][nan_idx - 1]
             self.__fuel_data[fuel_prices_cols.date_col][nan_idx] = self.__add_days_to_date(previous_date)
 
-    def __find_nan_indexes(self, column_name) -> numpy.ndarray:
-        return numpy.where(self.__fuel_data[column_name].isnull())[0]
-        # TODO Add handling KeyError if column not in dataframe
+    def __find_nan_indexes(self, column_name) -> Union[numpy.ndarray, List]:
+        try:
+            return numpy.where(self.__fuel_data[column_name].isnull())[0]
+        except KeyError:
+            return list()
 
     def __add_days_to_date(self, date) -> str:
         new_date = pandas.to_datetime(date, format=self.__date_format) + pandas.Timedelta(days=self.__samples_date_diff)
@@ -57,10 +79,11 @@ class DataFrameFiltration:
 
     def __replace_price_with_moving_average(self, nan_idx, column_name) -> None:
         for idx in nan_idx:
-            moving_avg = numpy.mean(self.__fuel_data[column_name][nan_idx - self.__number_of_samples / 2:
-                                                                  nan_idx + self.__number_of_samples / 2])
+            moving_avg = round(self.__fuel_data[column_name][idx - self.__number_of_samples // 2:
+                                                             idx + self.__number_of_samples // 2 + 1].mean(skipna=True),
+
+                               ndigits=2)
             self.__fuel_data[column_name][idx] = moving_avg
-            # TODO set precision to 2
 
     def __replace_vat(self) -> None:
         vat_changes = dict([("07/03/2001", 17.5),
@@ -75,12 +98,15 @@ class DataFrameFiltration:
                                         change_dict=vat_changes)
 
     def __replace_using_fix_values(self, nan_idx, column_name, change_dict):
-        date_of_change = change_dict.keys()
+        date_of_change = list(change_dict.keys())
         for idx in nan_idx:
-            for date in date_of_change:
-                if date <= self.__fuel_data[fuel_prices_cols.date_col][idx] <= next(date_of_change):
-                    self.__fuel_data[column_name][idx] = change_dict[date]
-            if self.__fuel_data[column_name][idx] is None:
+            current_date = datetime.strptime(self.__fuel_data[fuel_prices_cols.date_col][idx], self.__date_format)
+            for date_idx in range(len(date_of_change)-1):
+                date = datetime.strptime(date_of_change[date_idx], self.__date_format)
+                next_change_date = datetime.strptime(date_of_change[date_idx+1], self.__date_format)
+                if date <= current_date <= next_change_date:
+                    self.__fuel_data[column_name][idx] = change_dict[date_of_change[date_idx]]
+            if pandas.isnull(self.__fuel_data[column_name][idx]):
                 self.__fuel_data[column_name][idx] = change_dict[date_of_change[-1]]
 
     def __replace_duty_rates(self) -> None:
