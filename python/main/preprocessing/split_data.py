@@ -1,10 +1,18 @@
 import pandas
 
 from python.main.models.fuel_prices_columns import fuel_prices_cols, diesel_cols, petrol_cols
-# TODO prepare documentation
 
 
 class SplitDataFrames:
+    """
+    The SplitDataFrames is designed to separate petrol data from diesel data
+
+    Attributes:
+        dataframe (pandas.DataFrame): DataFrame containing fuel data
+
+    Raises:
+        AttributeError: while dataframe isn't instance of pandas.DataFrame
+    """
     def __init__(self, dataframe: pandas.DataFrame):
         if isinstance(dataframe, pandas.DataFrame):
             self.__original_dataframe = dataframe
@@ -12,6 +20,14 @@ class SplitDataFrames:
             raise AttributeError("Invalid argument")
 
     def split_petrol_and_diesel_data(self) -> (pandas.DataFrame, pandas.DataFrame):
+        """
+        Method split petrol and diesel data into separated DataFrames
+
+        Returns:
+            petrol_dataframe, diesel_dataframe (pandas.DataFrame, pandas.DataFrame):
+            DataFrame containing peterol data (date, price, vat, duty rates),
+            DataFrame containing diesel data (date, price, vat, duty rates)
+        """
         petrol_dataframe = pandas.DataFrame(data=self.__original_dataframe[[fuel_prices_cols.date_col,
                                                                             fuel_prices_cols.petrol_price_col,
                                                                             fuel_prices_cols.petrol_duty_rates_col,

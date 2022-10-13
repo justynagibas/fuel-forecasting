@@ -15,6 +15,8 @@ class DataFramePreprocessor:
         date_format (str): date format used to replace missing dates
         samples_date_diff (int): number of days between fuel samples
         number_of_samples (int):number of samples used to calculate missing prices data
+    Raises:
+        AttributeError: while fuel_data isn't instance of pandas.DataFrame
     """
 
     def __init__(self, fuel_data: pandas.DataFrame, date_format: str = "%d/%m/%Y", samples_date_diff: int = 7,
