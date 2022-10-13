@@ -5,7 +5,6 @@ from python.main.models.fuel_prices_columns import fuel_prices_cols, diesel_cols
 
 
 class SplitDataFrames:
-    # TODO add error when no pandas.DataFrame is pass
     def __init__(self, dataframe: pandas.DataFrame):
         if isinstance(dataframe, pandas.DataFrame):
             self.__original_dataframe = dataframe

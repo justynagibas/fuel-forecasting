@@ -17,7 +17,6 @@ class DataFramePreprocessor:
         number_of_samples (int):number of samples used to calculate missing prices data
     """
 
-    # TODO add error when no pandas.DataFrame is pass
     def __init__(self, fuel_data: pandas.DataFrame, date_format: str = "%d/%m/%Y", samples_date_diff: int = 7,
                  number_of_samples: int = 10):
         if isinstance(fuel_data, pandas.DataFrame):
