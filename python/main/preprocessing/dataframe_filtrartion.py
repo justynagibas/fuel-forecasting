@@ -17,12 +17,13 @@ class DataFramePreprocessor:
         number_of_samples (int):number of samples used to calculate missing prices data
     """
 
+    # TODO add error when no pandas.DataFrame is pass
     def __init__(self, fuel_data: pandas.DataFrame, date_format: str = "%d/%m/%Y", samples_date_diff: int = 7,
                  number_of_samples: int = 10):
         if isinstance(fuel_data, pandas.DataFrame):
             self.__fuel_data = fuel_data
         else:
-            self.__fuel_data = None
+            raise AttributeError("Invalid argument")
         self.__columns = 1
         self.__rows = 0
         self.__date_format = date_format
