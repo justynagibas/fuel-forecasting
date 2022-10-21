@@ -42,6 +42,7 @@ class NetworkPreprocessor:
             AttributeError: while no dataframe is not an instance of pandas.DataFrame
                             while fuel type in not str or name is not recognized
         """
+        # TODO add error while no such column found (case when fuel_type doesn't match dataframe)
         if not isinstance(dataframe, pandas.DataFrame):
             raise AttributeError("Invalid argument: No DataFrame passed")
         if fuel_type == "petrol":

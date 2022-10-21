@@ -1,6 +1,24 @@
 import pandas
 
 from python.main.models.fuel_prices_columns import fuel_prices_cols, diesel_cols, petrol_cols
+# TODO add documentation and tests
+
+
+def split_train_validation_and_test7(dataframe: pandas.DataFrame, date: str = "01/01/2022", train_ratio: float = 0.75) \
+        -> (pandas.DataFrame, pandas.DataFrame, pandas.DataFrame):
+    if not isinstance(dataframe, pandas.DataFrame):
+        raise AttributeError("Invalid argument: Data need to be a DataFrame")
+    if not isinstance(date, str):
+        raise AttributeError("Invalid argument: Date need to be passed as string")
+    if not isinstance(train_ratio, float):
+        raise AttributeError("Invalid argument: Train ratio need to be an double/float")
+    if train_ratio < 0 or train_ratio > 1:
+        raise AttributeError("Invalid argument: Train ratio need to be in range (0,1)")
+    test = dataframe.where(fuel_prices_cols.date_col >= date)
+    number_of_records = dataframe.shape[0] - test.shape[0]
+    train = dataframe.iloc[:int(number_of_records*train_ratio)]
+    validation = dataframe.iloc[int(number_of_records*train_ratio):number_of_records]
+    return train, validation, test
 
 
 class SplitDataFrames:
@@ -46,3 +64,5 @@ class SplitDataFrames:
                                                      diesel_cols.duty_rates_col,
                                                      diesel_cols.vat_col])
         return petrol_dataframe, diesel_dataframe
+
+
