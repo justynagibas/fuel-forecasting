@@ -6,6 +6,8 @@ from python.main.preprocessing.network_preprocess import NetworkPreprocessor
 from python.main.loading.load_data import LoadData
 from python.main.visualization.plot_signgle_series import plot_petrol_price_over_time, plot_diesel_price_over_time
 from python.main.models.fuel_prices_columns import fuel_prices_cols, petrol_cols, diesel_cols
+from python.main.predictions.MFFNN_model import MLPNetwork
+from python.main.predictions.RNN_model import LSTMNetwork
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -22,11 +24,24 @@ if __name__ == '__main__':
     dataframe_split = SplitDataFrames(filtered_dataframe)
     petrol_dataframe, diesel_dataframe = dataframe_split.split_petrol_and_diesel_data()
     print(petrol_dataframe.head())
-    print(diesel_dataframe.head())
+    # print(diesel_dataframe.head())
     plot_petrol_price_over_time(petrol_dataframe=petrol_dataframe[[petrol_cols.date_col, petrol_cols.price_col]])
-    plot_diesel_price_over_time(diesel_dataframe=diesel_dataframe[[diesel_cols.date_col, diesel_cols.price_col]])
+    # plot_diesel_price_over_time(diesel_dataframe=diesel_dataframe[[diesel_cols.date_col, diesel_cols.price_col]])
     petrol_network_preprocessor = NetworkPreprocessor()
     print(petrol_network_preprocessor.add_features(dataframe=petrol_dataframe, fuel_type="petrol").head(10))
+    test_network = MLPNetwork(number_of_inputs=10, number_of_outputs=1)
+    test_network.create_network()
+    test_network.train_network(petrol_dataframe.dropna(axis=0), "petrol")
+    prediction = test_network.predict(petrol_dataframe.dropna(axis=0), "petrol")
+    plt.plot(prediction)
+    plt.show()
+    test_rec_network = LSTMNetwork(number_of_inputs=8, number_of_outputs=1)
+    test_rec_network.create_network()
+    test_rec_network.train_network(petrol_dataframe.dropna(axis=0), "petrol")
+    prediction_rec = test_rec_network.predict(petrol_dataframe.dropna(axis=0), "petrol")
+    print(prediction_rec)
+    plt.plot(prediction_rec)
+    plt.show()
 
     # json_test_df = pandas.DataFrame({fuel_prices_cols.date_col: ["01/06/2021", "08/06/2021", "15/06/2021", "21/06/2021","28/06/2021"],
     #                                  fuel_prices_cols.petrol_price_col: [2.25, 1.46, 2.56, 2.34, 3.21],
