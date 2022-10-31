@@ -1,3 +1,11 @@
+CEL:
+
+Celem pracy jest wykorzystanie sztucznych sieci neuronowych do przewidywania cen wybranych paliw oraz porównanie otrzymanych wyników z wybranymi metodami przewidywania szeregów czasowych.
+ Program zostanie zaimplementowany z wykorzystaniem wybranego języka programowania. Należy zaprezentować działanie sieci neuronowej w predykcji cen wraz z eksperymentami dokumentującymi
+ jakość uzyskanych wyników. W pracy zostanie również zaprezentowany przegląd wybranych pozycji literatury,
+ w tym przegląd wybranych metod prognozowania znajdujących aktualnie zastosowanie do przewidywania cen paliw.
+
+
 Plan:
 1. Wstęp – co robione
 2. Opis metod używanych do prognozowania cen paliwa 
@@ -38,7 +46,11 @@ Budowa sieci:
 Literatura:
 
 A tutorial on training recurrent neural networks, covering BPPT, RTRL, EKF and the "echo state network" approach
+
 C. a., C. K. M. Lee, and Z. Wu, “A Comparison between Neural Networks and Traditional Forecasting Methods: A Case Study,” Int. J. Eng. Bus. Manag., vol. 1, no. 2, p. 1, 2009. 
 
 Davey N., Hunt S.P., Frank R.J. (1999) Time series prediction and neural networks, Journal of Intelligent and Robotic Systems, 31(1–3), pp. 91–103
+
 Conner J, Martin R Douglas (1994) Recurrent NN and robust time series prediction. IEEE transactions on NN, 5: 240–254, 1994 Crossref.
+
+strona tytułowa, 10 stron teorii, literaturę, motywację

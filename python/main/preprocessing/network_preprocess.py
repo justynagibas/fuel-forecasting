@@ -1,5 +1,5 @@
 import pandas
-from python.main.models.fuel_prices_columns import petrol_cols, diesel_cols
+from models.fuel_prices_columns import petrol_cols, diesel_cols
 
 
 class NetworkPreprocessor:

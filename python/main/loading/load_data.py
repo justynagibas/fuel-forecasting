@@ -1,6 +1,7 @@
 import pandas
 import os
-from python.main.models.fuel_prices_columns import fuel_prices_cols
+
+from models.fuel_prices_columns import fuel_prices_cols
 
 
 class LoadData:

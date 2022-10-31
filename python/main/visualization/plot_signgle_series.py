@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas
 import matplotlib.dates as dates
-from python.main.models.fuel_prices_columns import petrol_cols, diesel_cols
+from models.fuel_prices_columns import petrol_cols, diesel_cols
 
 
 def plot_petrol_price_over_time(petrol_dataframe: pandas.DataFrame) -> None:

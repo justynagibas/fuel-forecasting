@@ -3,7 +3,7 @@ import pandas
 import numpy
 from typing import Union, List, Dict
 from datetime import datetime
-from python.main.models.fuel_prices_columns import fuel_prices_cols
+from models.fuel_prices_columns import fuel_prices_cols
 
 
 class DataFramePreprocessor:
@@ -40,7 +40,11 @@ class DataFramePreprocessor:
         """
         columns_to_remove = [fuel_prices_cols.not_required_1,
                              fuel_prices_cols.not_required_2,
-                             fuel_prices_cols.not_required_3]
+                             fuel_prices_cols.not_required_3,
+                             fuel_prices_cols.petrol_vat_col,
+                             fuel_prices_cols.diesel_vat_col,
+                             fuel_prices_cols.petrol_duty_rates_col,
+                             fuel_prices_cols.diesel_duty_rates_col]
         for column in columns_to_remove:
             try:
                 self.__fuel_data.drop(columns=column, axis=self.__columns, inplace=True)
@@ -64,8 +68,6 @@ class DataFramePreprocessor:
         """
         self.__replace_dates()
         self.__replace_fuel_price()
-        self.__replace_duty_rates()
-        self.__replace_vat()
 
     def __replace_dates(self) -> None:
         """
@@ -127,64 +129,64 @@ class DataFramePreprocessor:
                                ndigits=2)
             self.__fuel_data[column_name][idx] = moving_avg
 
-    def __replace_vat(self) -> None:
-        """
-        Private method to replace missing values of vat. It replaces values inplace. Vat changes are known and are kept
-        in dictionary named vat_changes. Which value is appropriated is determine by self.__fill_na_using_dict.
-        """
-        vat_changes = dict([("07/03/2001", 17.5),
-                            ("01/12/2008", 15.0),
-                            ("01/01/2010", 17.5),
-                            ("09/01/2011", 20.0)])
-        nan_diesel_vat_idx = self.__find_nan_indexes(column_name=fuel_prices_cols.diesel_vat_col)
-        nan_petrol_vat_idx = self.__find_nan_indexes(column_name=fuel_prices_cols.petrol_vat_col)
-        self.__fill_na_using_dict(nan_idx=nan_diesel_vat_idx, column_name=fuel_prices_cols.diesel_vat_col,
-                                  change_dict=vat_changes)
-        self.__fill_na_using_dict(nan_idx=nan_petrol_vat_idx, column_name=fuel_prices_cols.petrol_vat_col,
-                                  change_dict=vat_changes)
-
-    def __fill_na_using_dict(self, nan_idx: Union[numpy.ndarray, List], column_name: str,
-                             change_dict: Dict[str, float]) -> None:
-        """
-        Private method to replace nan values using dictionary. It replace missing values inplace. It check in which time
-        period is date of missing value and replace it using vat or duty rates value in that time.
-        Params:
-            nan_idx (Union[numpy.ndarray, List]): iterable container containing indexes of nan values
-            column_name (str): name of column where to replace missing values
-            change_dict (Dict[str, float]): dictionary containing dates and values of vat or duty rates over time
-        """
-        date_of_change = list(change_dict.keys())
-        for idx in nan_idx:
-            current_date = datetime.strptime(self.__fuel_data[fuel_prices_cols.date_col][idx], self.__date_format)
-            for date_idx in range(len(date_of_change)-1):
-                date = datetime.strptime(date_of_change[date_idx], self.__date_format)
-                next_change_date = datetime.strptime(date_of_change[date_idx+1], self.__date_format)
-                if date <= current_date <= next_change_date:
-                    self.__fuel_data[column_name][idx] = change_dict[date_of_change[date_idx]]
-            if pandas.isnull(self.__fuel_data[column_name][idx]):
-                self.__fuel_data[column_name][idx] = change_dict[date_of_change[-1]]
-
-    def __replace_duty_rates(self) -> None:
-        """
-        Private method to replace missing values of duty rates. It replaces values inplace. Duty rates changes are known
-        and are kept in dictionary named duty_rates_changes. Which value is appropriated is determine by
-        self.__fill_na_using_dict.
-        """
-        duty_rate_changes = dict([("07/03/2001", 45.82),
-                                  ("01/10/2003", 47.10),
-                                  ("07/12/2006", 48.35),
-                                  ("01/10/2007", 50.35),
-                                  ("01/12/2008", 52.35),
-                                  ("01/04/2009", 54.19),
-                                  ("01/09/2009", 56.19),
-                                  ("01/04/2010", 57.19),
-                                  ("01/10/2010", 58.19),
-                                  ("01/01/2011", 58.95),
-                                  ("23/03/2011", 57.95),
-                                  ("23/03/2022", 52.95)])
-        nan_diesel_duty_rates_idx = self.__find_nan_indexes(column_name=fuel_prices_cols.diesel_duty_rates_col)
-        nan_petrol_duty_rates_idx = self.__find_nan_indexes(column_name=fuel_prices_cols.petrol_duty_rates_col)
-        self.__fill_na_using_dict(nan_idx=nan_diesel_duty_rates_idx, column_name=fuel_prices_cols.diesel_duty_rates_col,
-                                  change_dict=duty_rate_changes)
-        self.__fill_na_using_dict(nan_idx=nan_petrol_duty_rates_idx, column_name=fuel_prices_cols.petrol_duty_rates_col,
-                                  change_dict=duty_rate_changes)
+    # def __replace_vat(self) -> None:
+    #     """
+    #     Private method to replace missing values of vat. It replaces values inplace. Vat changes are known and are kept
+    #     in dictionary named vat_changes. Which value is appropriated is determine by self.__fill_na_using_dict.
+    #     """
+    #     vat_changes = dict([("07/03/2001", 17.5),
+    #                         ("01/12/2008", 15.0),
+    #                         ("01/01/2010", 17.5),
+    #                         ("09/01/2011", 20.0)])
+    #     nan_diesel_vat_idx = self.__find_nan_indexes(column_name=fuel_prices_cols.diesel_vat_col)
+    #     nan_petrol_vat_idx = self.__find_nan_indexes(column_name=fuel_prices_cols.petrol_vat_col)
+    #     self.__fill_na_using_dict(nan_idx=nan_diesel_vat_idx, column_name=fuel_prices_cols.diesel_vat_col,
+    #                               change_dict=vat_changes)
+    #     self.__fill_na_using_dict(nan_idx=nan_petrol_vat_idx, column_name=fuel_prices_cols.petrol_vat_col,
+    #                               change_dict=vat_changes)
+    #
+    # def __fill_na_using_dict(self, nan_idx: Union[numpy.ndarray, List], column_name: str,
+    #                          change_dict: Dict[str, float]) -> None:
+    #     """
+    #     Private method to replace nan values using dictionary. It replace missing values inplace. It check in which time
+    #     period is date of missing value and replace it using vat or duty rates value in that time.
+    #     Params:
+    #         nan_idx (Union[numpy.ndarray, List]): iterable container containing indexes of nan values
+    #         column_name (str): name of column where to replace missing values
+    #         change_dict (Dict[str, float]): dictionary containing dates and values of vat or duty rates over time
+    #     """
+    #     date_of_change = list(change_dict.keys())
+    #     for idx in nan_idx:
+    #         current_date = datetime.strptime(self.__fuel_data[fuel_prices_cols.date_col][idx], self.__date_format)
+    #         for date_idx in range(len(date_of_change)-1):
+    #             date = datetime.strptime(date_of_change[date_idx], self.__date_format)
+    #             next_change_date = datetime.strptime(date_of_change[date_idx+1], self.__date_format)
+    #             if date <= current_date <= next_change_date:
+    #                 self.__fuel_data[column_name][idx] = change_dict[date_of_change[date_idx]]
+    #         if pandas.isnull(self.__fuel_data[column_name][idx]):
+    #             self.__fuel_data[column_name][idx] = change_dict[date_of_change[-1]]
+    #
+    # def __replace_duty_rates(self) -> None:
+    #     """
+    #     Private method to replace missing values of duty rates. It replaces values inplace. Duty rates changes are known
+    #     and are kept in dictionary named duty_rates_changes. Which value is appropriated is determine by
+    #     self.__fill_na_using_dict.
+    #     """
+    #     duty_rate_changes = dict([("07/03/2001", 45.82),
+    #                               ("01/10/2003", 47.10),
+    #                               ("07/12/2006", 48.35),
+    #                               ("01/10/2007", 50.35),
+    #                               ("01/12/2008", 52.35),
+    #                               ("01/04/2009", 54.19),
+    #                               ("01/09/2009", 56.19),
+    #                               ("01/04/2010", 57.19),
+    #                               ("01/10/2010", 58.19),
+    #                               ("01/01/2011", 58.95),
+    #                               ("23/03/2011", 57.95),
+    #                               ("23/03/2022", 52.95)])
+    #     nan_diesel_duty_rates_idx = self.__find_nan_indexes(column_name=fuel_prices_cols.diesel_duty_rates_col)
+    #     nan_petrol_duty_rates_idx = self.__find_nan_indexes(column_name=fuel_prices_cols.petrol_duty_rates_col)
+    #     self.__fill_na_using_dict(nan_idx=nan_diesel_duty_rates_idx, column_name=fuel_prices_cols.diesel_duty_rates_col,
+    #                               change_dict=duty_rate_changes)
+    #     self.__fill_na_using_dict(nan_idx=nan_petrol_duty_rates_idx, column_name=fuel_prices_cols.petrol_duty_rates_col,
+    #                               change_dict=duty_rate_changes)
