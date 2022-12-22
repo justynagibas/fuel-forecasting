@@ -28,24 +28,23 @@ class MLPNetwork:
         self._logger = logger
         self.network_model = None
 
-    def create_network(self, ratio=0.66) -> None:
+    def create_network(self, number_of_hidden_neurons) -> None:
         """
-        Method to build structure of neuraln network
+        Method to build structure of neural network
 
         Arguments:
-            ratio (double): ratio of number of neurons in hidden layers to sum of number of inputs and outputs neurons
+            number_of_hidden_neurons (int): number of neurons in hidden layers
 
         Returns:
-            It override self.network_model with build model
+            It overrides self.network_model with build model
         """
-        number_of_hidden_neurons = int((self.number_of_inputs+self.number_of_outputs)*ratio)
         mlp = Sequential()
         mlp.add(InputLayer(input_shape=(self.number_of_inputs,)))
         for layer in range(self.number_of_hidden_layers):
             mlp.add(Dense(number_of_hidden_neurons, activation=self.activation_function))
         mlp.add(Dense(self.number_of_outputs))
         self.network_model = mlp
-        mlp.summary(print_fn=self._logger.info)
+        # mlp.summary(print_fn=self._logger.info)
 
     def train_network(self, fuel_data: pandas.DataFrame, validation_data: pandas.DataFrame, fuel_type: str, epochs: int, optimizer) -> None:
         """
@@ -62,12 +61,12 @@ class MLPNetwork:
             AttributeError: while fuel type in not str or name is not recognized
         """
         self.network_model.compile(optimizer=optimizer, loss=loss.MeanSquaredError(),
-                                   metrics=[metrics.MeanAbsoluteError(), metrics.MeanSquaredError()])
+                                   metrics=[metrics.MeanAbsolutePercentageError(), metrics.MeanSquaredError()])
         if fuel_type == "diesel":
             y_train = fuel_data[[diesel_cols.price_col]].to_numpy()
             x_train = fuel_data.drop(columns=[diesel_cols.price_col, diesel_cols.date_col]).to_numpy()
-            x_validate = validation_data[[diesel_cols.price_col]].to_numpy()
-            y_validate = validation_data.drop(columns=[diesel_cols.price_col, diesel_cols.date_col]).to_numpy()
+            y_validate = validation_data[[diesel_cols.price_col]].to_numpy()
+            x_validate = validation_data.drop(columns=[diesel_cols.price_col, diesel_cols.date_col]).to_numpy()
         elif fuel_type == "petrol":
             y_train = fuel_data[[petrol_cols.price_col]].to_numpy()
             x_train = fuel_data.drop(columns=[petrol_cols.price_col, petrol_cols.date_col]).to_numpy()
@@ -75,8 +74,8 @@ class MLPNetwork:
             x_validate = validation_data.drop(columns=[petrol_cols.price_col, petrol_cols.date_col]).to_numpy()
         else:
             raise AttributeError("Invalid argument: Fuel type isn't recognized")
-        logs = self.network_model.fit(x=x_train, y=y_train, epochs=epochs, validation_data=(x_validate, y_validate))
-        self._logger.info(logs.history)
+        self.network_model.fit(x=x_train, y=y_train, epochs=epochs, validation_data=(x_validate, y_validate))
+        # self._logger.info(logs.history)
 
     def predict(self, fuel_data: pandas.DataFrame, fuel_type: str) -> numpy.ndarray:
         """

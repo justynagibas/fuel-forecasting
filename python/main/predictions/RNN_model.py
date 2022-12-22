@@ -31,7 +31,7 @@ class LSTMNetwork:
         self._logger = logger
         self.network_model = None
 
-    def create_network(self, ratio=0.66):
+    def create_network(self, number_of_hidden_neurons):
         """
         Method to build structure of neuraln network
 
@@ -41,7 +41,6 @@ class LSTMNetwork:
         Returns:
             It override self.network_model with build model
         """
-        number_of_hidden_neurons = int((self.number_of_inputs + self.number_of_outputs) * ratio)
         lstm = Sequential()
         lstm.add(LSTM(units=number_of_hidden_neurons, input_shape=(self.number_of_inputs, 1), activation=self.activation_function,
                       recurrent_activation=self.recurrent_function, return_sequences=True))
@@ -51,7 +50,7 @@ class LSTMNetwork:
         lstm.add(LSTM(units=number_of_hidden_neurons, activation=self.activation_function))
         lstm.add(Dense(units=self.number_of_outputs))
         self.network_model = lstm
-        lstm.summary(print_fn=self._logger.info)
+        # lstm.summary(print_fn=self._logger.info)
 
     def train_network(self,fuel_data: pandas.DataFrame, validation_data: pandas.DataFrame, fuel_type: str, epochs: int, optimizer) -> None:
         """
@@ -68,12 +67,12 @@ class LSTMNetwork:
             AttributeError: while fuel type in not str or name is not recognized
         """
         self.network_model.compile(optimizer=optimizer, loss=loss.MeanSquaredError(),
-                                   metrics=[metrics.MeanAbsoluteError(), metrics.MeanSquaredError()])
+                                   metrics=[metrics.MeanAbsolutePercentageError(), metrics.MeanSquaredError()])
         if fuel_type == "diesel":
             y_train = fuel_data[[diesel_cols.price_col]].to_numpy()
             x_train = fuel_data.drop(columns=[diesel_cols.price_col, diesel_cols.date_col]).to_numpy()
-            x_validate = validation_data[[diesel_cols.price_col]].to_numpy()
-            y_validate = validation_data.drop(columns=[diesel_cols.price_col, diesel_cols.date_col]).to_numpy()
+            y_validate = validation_data[[diesel_cols.price_col]].to_numpy()
+            x_validate = validation_data.drop(columns=[diesel_cols.price_col, diesel_cols.date_col]).to_numpy()
         elif fuel_type == "petrol":
             y_train = fuel_data[[petrol_cols.price_col]].to_numpy()
             x_train = fuel_data.drop(columns=[petrol_cols.price_col, petrol_cols.date_col]).to_numpy()
@@ -83,8 +82,8 @@ class LSTMNetwork:
             raise AttributeError("Invalid argument: Fuel type isn't recognized")
         x_train = numpy.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
         x_validate = numpy.reshape(x_validate, (x_validate.shape[0], x_validate.shape[1], 1))
-        logs = self.network_model.fit(x=x_train, y=y_train, epochs=epochs, validation_data=(x_validate, y_validate))
-        self._logger.info(logs.history)
+        self.network_model.fit(x=x_train, y=y_train, epochs=epochs, validation_data=(x_validate, y_validate))
+        # self._logger.info(logs.history)
 
     def predict(self, fuel_data: pandas.DataFrame, fuel_type: str) -> numpy.ndarray:
         """
